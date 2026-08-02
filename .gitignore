@@ -2,11 +2,19 @@
 /frontend/node_modules
 /frontend/dist
 /frontend/coverage
+/frontend/.vite
+# avoid accidental nested template folders
+/backend/frontend/node_modules
+/backend/frontend/dist
+
 # Go
 /backend/bin
 /backend/coverage.out
-# Editor
-.vscode/
+
+# Editor / OS
 .DS_Store
+.vscode/
+.idea/
+
 # Docker
 docker-compose.override.yml
