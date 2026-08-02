@@ -33,4 +33,3 @@ Response: {"result":23,"error":null}
 Notes
 - The API returns JSON in the form: { "result": <number|null>, "error": <string|null> }.
 - For local frontend dev, ensure the frontend is configured to call http://localhost:8080 or update the API URL using environment variables.
-

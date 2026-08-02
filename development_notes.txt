@@ -1,0 +1,4 @@
+Development notes:
+- Frontend: React + TypeScript (Vite). Tests: Vitest. Coverage: c8/LCOV.
+- Backend: Go net/http. Tests with go test. Coverage via go tool cover.
+- CI: GitHub Actions runs tests for both services.

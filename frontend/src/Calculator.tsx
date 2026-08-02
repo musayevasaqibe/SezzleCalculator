@@ -3,8 +3,8 @@ import React, { useState } from "react";
 type Resp = { result?: number | null; error?: string | null };
 
 export default function Calculator() {
-  const [display, setDisplay] = useState<string>(""); // what's shown on screen
-  const [stored, setStored] = useState<number | null>(null); // stored operand A
+  const [display, setDisplay] = useState<string>(""); // current typed number (right-hand)
+  const [stored, setStored] = useState<number | null>(null); // left-hand operand
   const [pendingOp, setPendingOp] = useState<string | null>(null); // add, sub, etc.
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -17,6 +17,15 @@ export default function Calculator() {
     { value: "div", label: "÷" },
   ];
 
+  const opSymbols: Record<string, string> = {
+    add: "+",
+    sub: "-",
+    mul: "×",
+    div: "÷",
+    pow: "^",
+    pct: "%",
+  };
+
   function pushDigit(d: string) {
     setDisplay((prev) => (prev === "0" ? d : prev + d));
     setError(null);
@@ -27,6 +36,32 @@ export default function Calculator() {
     setStored(null);
     setPendingOp(null);
     setError(null);
+  }
+
+  function deleteLast() {
+    setError(null);
+    if (display !== "") {
+      const next = display.slice(0, -1);
+      setDisplay(next);
+      return;
+    }
+    // If display is empty but there's a stored value and no pendingOp,
+    // allow deleting last digit from stored (optional UX).
+    if (stored !== null && !pendingOp) {
+      const s = String(stored);
+      if (s.length <= 1) {
+        setStored(null);
+      } else {
+        // preserve numeric value after removing last char
+        const trimmed = s.slice(0, -1);
+        const num = Number(trimmed);
+        if (!Number.isNaN(num)) {
+          setStored(num);
+        } else {
+          setStored(null);
+        }
+      }
+    }
   }
 
   function chooseOp(op: string) {
@@ -79,25 +114,39 @@ export default function Calculator() {
     computeRemote({ op: pendingOp, a: stored, b: Number(display) });
   }
 
+  // Build the full display text: stored + operator + current display
+  const displayText = (() => {
+    if (stored !== null) {
+      const left = String(stored);
+      const op = pendingOp ? opSymbols[pendingOp] || pendingOp : "";
+      const right = display || "";
+      return left + (op ? op : "") + right;
+    }
+    return display || "0";
+  })();
+
   return (
     <div className="calc-wrapper">
       <div className="display" data-testid="display">
-        {display || (stored !== null ? String(stored) : "0")}
+        {displayText}
       </div>
 
       <div className="button-row">
+        <button className="btn" onClick={deleteLast} disabled={loading}>
+          DEL
+        </button>
         <button className="btn wide" onClick={clearAll} disabled={loading}>
           C
         </button>
         <button
-          className="btn op"
+          className={`btn op ${pendingOp === "div" ? "active" : ""}`}
           onClick={() => chooseOp("div")}
           disabled={loading}
         >
           ÷
         </button>
         <button
-          className="btn op"
+          className={`btn op ${pendingOp === "mul" ? "active" : ""}`}
           onClick={() => chooseOp("mul")}
           disabled={loading}
         >
@@ -123,7 +172,7 @@ export default function Calculator() {
           {ops.map((o) => (
             <button
               key={o.value}
-              className="btn op"
+              className={`btn op ${pendingOp === o.value ? "active" : ""}`}
               onClick={() => chooseOp(o.value)}
               disabled={loading}
             >
