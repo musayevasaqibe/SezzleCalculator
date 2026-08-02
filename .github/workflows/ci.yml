@@ -41,5 +41,5 @@ jobs:
       - name: Upload frontend coverage
         uses: actions/upload-artifact@v4
         with:
-          name: frontend-lcov
-          path: frontend/coverage/lcov.info
+          name: frontend-coverage
+          path: frontend/coverage/**
