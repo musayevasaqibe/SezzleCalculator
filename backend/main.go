@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 )
 
 type CalcRequest struct {
@@ -27,58 +28,63 @@ func main() {
 	}
 }
 
+func writeJSON(w http.ResponseWriter, status int, v any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(v)
+}
+
 func calcHandler(w http.ResponseWriter, r *http.Request) {
-	// Allow CORS for local dev
-	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+	// CORS: allow from configured origin for local dev
+	origin := os.Getenv("VITE_API_URL")
+	if origin == "" {
+		origin = "*"
+	}
+	w.Header().Set("Access-Control-Allow-Origin", origin)
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+
 	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusOK)
+		writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
 		return
 	}
 
 	if r.Method != http.MethodPost {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		writeJSON(w, http.StatusMethodNotAllowed, CalcResponse{Result: nil, Error: ptr("method not allowed")})
 		return
 	}
 
 	var req CalcRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid json", http.StatusBadRequest)
+		writeJSON(w, http.StatusBadRequest, CalcResponse{Result: nil, Error: ptr("invalid json")})
 		return
 	}
 
-	// simple validation
 	if req.Op == "" || req.A == nil {
-		http.Error(w, "missing op or a", http.StatusBadRequest)
+		writeJSON(w, http.StatusBadRequest, CalcResponse{Result: nil, Error: ptr("missing op or a")})
 		return
 	}
 
-	// For operations that require b, ensure it's present
 	needsB := req.Op == "add" || req.Op == "sub" || req.Op == "mul" || req.Op == "div" || req.Op == "pow" || req.Op == "pct"
 	if needsB && req.B == nil {
-		http.Error(w, "missing b for this operation", http.StatusBadRequest)
+		writeJSON(w, http.StatusBadRequest, CalcResponse{Result: nil, Error: ptr("missing b for this operation")})
 		return
 	}
 
-	result, err := Compute(req.Op, *req.A, func() float64 {
-		if req.B == nil {
-			return 0
-		}
-		return *req.B
-	}())
+	b := 0.0
+	if req.B != nil {
+		b = *req.B
+	}
 
-	var resp CalcResponse
+	result, err := Compute(req.Op, *req.A, b)
+
 	if err != nil {
 		msg := err.Error()
-		resp.Error = &msg
-		resp.Result = nil
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
-		_ = json.NewEncoder(w).Encode(resp)
+		writeJSON(w, http.StatusBadRequest, CalcResponse{Result: nil, Error: &msg})
 		return
 	}
-	resp.Result = &result
-	resp.Error = nil
-	w.Header().Set("Content-Type", "application/json")
-	_ = json.NewEncoder(w).Encode(resp)
+
+	writeJSON(w, http.StatusOK, CalcResponse{Result: &result, Error: nil})
 }
+
+func ptr(s string) *string { return &s }
