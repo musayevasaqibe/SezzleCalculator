@@ -1,0 +1,73 @@
+:root {
+  --bg: #f7f8fb;
+  --card: #fff;
+  --accent: #2563eb;
+  --muted: #6b7280;
+  --btn: #f3f4f6;
+}
+
+* { box-sizing: border-box; }
+body {
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+  background: var(--bg);
+  margin: 0;
+  padding: 2rem;
+  color: #111827;
+}
+.app {
+  max-width: 420px;
+  margin: 0 auto;
+}
+.calc-wrapper {
+  background: var(--card);
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.display {
+  background: #111827;
+  color: #fff;
+  font-size: 2rem;
+  text-align: right;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+  min-height: 56px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+}
+.button-row { display:flex; gap:8px; margin-bottom:8px; }
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 80px;
+  gap: 8px;
+}
+.digits {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.ops-col {
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.btn {
+  background: var(--btn);
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 14px;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+.btn:disabled { opacity: 0.6; cursor: default; }
+.btn.digit { background: #fff; }
+.btn.op { background: #fde68a; }
+.btn.wide { flex: 1; }
+.btn.eq { background: var(--accent); color: white; }
+.status { margin-top: 8px; min-height: 20px; }
+.status .error { color: #b91c1c; }
+@media (max-width: 480px) {
+  .grid { grid-template-columns: 1fr 64px; }
+}
