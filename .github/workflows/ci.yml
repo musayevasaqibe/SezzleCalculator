@@ -36,7 +36,7 @@ jobs:
       - name: Install & run tests (use legacy-peer-deps to avoid CI ERESOLVE)
         working-directory: frontend
         run: |
-          npm ci --legacy-peer-deps
+          npm ci
           npx c8 --reporter=text --reporter=lcov npx vitest run
       - name: Debug coverage files (list what's produced)
         working-directory: frontend
