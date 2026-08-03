@@ -1,3 +1,3 @@
 module github.com/saqibem/sezzle-calc-backend
 
-go 1.26.5
+go 1.20
