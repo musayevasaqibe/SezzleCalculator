@@ -37,7 +37,7 @@ jobs:
         working-directory: frontend
         run: |
           npm ci --legacy-peer-deps
-          npm run coverage
+          npx c8 --reporter=text --reporter=lcov npx vitest run
       - name: Debug coverage files (list what's produced)
         working-directory: frontend
         run: |
