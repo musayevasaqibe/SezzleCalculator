@@ -32,7 +32,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
       - name: Install & run tests (use legacy-peer-deps to avoid CI ERESOLVE)
         working-directory: frontend
         run: |
