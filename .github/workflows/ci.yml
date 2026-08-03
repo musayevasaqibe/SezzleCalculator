@@ -33,11 +33,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-      - name: Install & run tests
+      - name: Install & run tests (use legacy-peer-deps to avoid CI ERESOLVE)
         working-directory: frontend
         run: |
-          npm ci
-          npx c8 --reporter=text --reporter=lcov npx vitest run
+          npm ci --legacy-peer-deps
+          npm run coverage
+      - name: Debug coverage files (list what's produced)
+        working-directory: frontend
+        run: |
+          echo "pwd: $(pwd)"
+          node -v
+          npm -v
+          echo "--- ls -la ---"
+          ls -la
+          echo "--- coverage dir ---"
+          ls -la coverage || true
+          echo "--- find lcov/info files ---"
+          find . -maxdepth 4 -type f -name 'lcov*' -o -name '*.info' -print || true
       - name: Upload frontend coverage
         uses: actions/upload-artifact@v4
         with:
